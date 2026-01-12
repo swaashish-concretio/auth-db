@@ -1,0 +1,64 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { getProfile } from '../utils/api';
+
+function Dashboard({ setIsAuthenticated }) {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const data = await getProfile();
+        setUser(data.user);
+      } catch (err) {
+        console.error('Failed to fetch profile:', err);
+        handleLogout();
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setIsAuthenticated(false);
+    navigate('/login');
+  };
+
+  if (loading) {
+    return (
+      <div className="container">
+        <div className="dashboard">
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container">
+      <div className="dashboard">
+        <h2>Dashboard</h2>
+
+        {user && (
+          <div className="user-info">
+            <p><strong>Name:</strong> {user.name}</p>
+            <p><strong>Email:</strong> {user.email}</p>
+            <p><strong>Member since:</strong> {new Date(user.created_at).toLocaleDateString()}</p>
+          </div>
+        )}
+
+        <button onClick={handleLogout} className="btn btn-logout">
+          Logout
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export default Dashboard;
