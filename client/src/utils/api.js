@@ -6,6 +6,7 @@ export const signup = async (email, password, name) => {
     headers: {
       'Content-Type': 'application/json',
     },
+    credentials: 'include',
     body: JSON.stringify({ email, password, name }),
   });
 
@@ -24,6 +25,7 @@ export const login = async (email, password) => {
     headers: {
       'Content-Type': 'application/json',
     },
+    credentials: 'include',
     body: JSON.stringify({ email, password }),
   });
 
@@ -37,19 +39,30 @@ export const login = async (email, password) => {
 };
 
 export const getProfile = async () => {
-  const token = localStorage.getItem('token');
-
   const response = await fetch(`${API_URL}/profile`, {
     method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
+    credentials: 'include',
   });
 
   const data = await response.json();
 
   if (!response.ok) {
     throw new Error(data.error || 'Failed to fetch profile');
+  }
+
+  return data;
+};
+
+export const logout = async () => {
+  const response = await fetch(`${API_URL}/logout`, {
+    method: 'POST',
+    credentials: 'include',
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || 'Logout failed');
   }
 
   return data;

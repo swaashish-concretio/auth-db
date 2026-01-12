@@ -112,9 +112,9 @@ npm install
 ```bash
 cd server
 npm run dev
-```
+'''
 
-Server runs on: `http://localhost:5000`
+Server runs on: `http://localhost:3001`
 
 ### Start Frontend
 
@@ -156,7 +156,7 @@ Frontend runs on: `http://localhost:3000`
 ## Security Features
 
 - Passwords hashed using bcrypt (10 salt rounds)
-- JWT tokens for stateless authentication
+- JWT tokens for stateless authentication --> stateless 
 - Token expiration (7 days)
 - Protected routes with middleware
 - Input validation

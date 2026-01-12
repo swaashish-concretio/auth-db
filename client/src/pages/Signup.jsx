@@ -17,7 +17,6 @@ function Signup({ setIsAuthenticated }) {
 
     try {
       const data = await signup(email, password, name);
-      localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
       setIsAuthenticated(true);
       navigate('/dashboard');

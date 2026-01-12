@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getProfile } from '../utils/api';
+import { getProfile, logout } from '../utils/api';
 
 function Dashboard({ setIsAuthenticated }) {
   const [user, setUser] = useState(null);
@@ -23,11 +23,19 @@ function Dashboard({ setIsAuthenticated }) {
     fetchProfile();
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setIsAuthenticated(false);
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      await logout();
+      localStorage.removeItem('user');
+      setIsAuthenticated(false);
+      navigate('/login');
+    } catch (err) {
+      console.error('Logout failed:', err);
+      // Still log out locally even if API call fails
+      localStorage.removeItem('user');
+      setIsAuthenticated(false);
+      navigate('/login');
+    }
   };
 
   if (loading) {

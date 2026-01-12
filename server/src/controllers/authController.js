@@ -28,9 +28,15 @@ export const signup = async (req, res) => {
       { expiresIn: '7d' }
     );
 
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+
     res.status(201).json({
       message: 'User created successfully',
-      token,
       user: {
         id: user.id,
         email: user.email,
@@ -67,9 +73,15 @@ export const login = async (req, res) => {
       { expiresIn: '7d' }
     );
 
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+
     res.json({
       message: 'Login successful',
-      token,
       user: {
         id: user.id,
         email: user.email,
@@ -94,3 +106,14 @@ export const getProfile = async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 };
+
+export const logout = async (req, res) => {
+  try {
+    res.clearCookie('token');
+    res.json({ message: 'Logout successful' });
+  } catch (error) {
+    console.error('Logout error:', error);
+    res.status(500).json({ error: 'Server error during logout' });
+  }
+};
+
