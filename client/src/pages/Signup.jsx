@@ -30,38 +30,36 @@ function Signup({ setIsAuthenticated }) {
   return (
     <div className="container">
       <div className="auth-card">
-        <h2>Create Account</h2>
-        <p>Sign up to get started</p>
+        <h2>New User Registration</h2>
+        <p>Please complete the form below to create an account.</p>
 
         {error && <div className="error">{error}</div>}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="name">Name</label>
+            <label htmlFor="name">Full Name *</label>
             <input
               type="text"
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              placeholder="Enter your name"
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email">Email Address *</label>
             <input
               type="email"
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              placeholder="Enter your email"
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password">Password * (minimum 6 characters)</label>
             <input
               type="password"
               id="password"
@@ -69,17 +67,18 @@ function Signup({ setIsAuthenticated }) {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength="6"
-              placeholder="Enter your password (min 6 characters)"
             />
           </div>
 
           <button type="submit" className="btn" disabled={loading}>
-            {loading ? 'Creating account...' : 'Sign Up'}
+            {loading ? 'Processing...' : 'Register'}
           </button>
         </form>
 
+        <p className="required-note">* Required field</p>
+
         <div className="switch-auth">
-          Already have an account? <Link to="/login">Login</Link>
+          Already have an account? <Link to="/login">Login here</Link>
         </div>
       </div>
     </div>

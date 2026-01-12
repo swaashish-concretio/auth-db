@@ -51,18 +51,18 @@ function Dashboard({ setIsAuthenticated }) {
   return (
     <div className="container">
       <div className="dashboard">
-        <h2>Dashboard</h2>
+        <h2>User Dashboard</h2>
 
         {user && (
           <div className="user-info">
-            <p><strong>Name:</strong> {user.name}</p>
-            <p><strong>Email:</strong> {user.email}</p>
-            <p><strong>Member since:</strong> {new Date(user.created_at).toLocaleDateString()}</p>
+            <p><strong>Full Name:</strong> {user.name}</p>
+            <p><strong>Email Address:</strong> {user.email}</p>
+            <p><strong>Account Created:</strong> {new Date(user.created_at).toLocaleDateString()}</p>
           </div>
         )}
 
         <button onClick={handleLogout} className="btn btn-logout">
-          Logout
+          Sign Out
         </button>
       </div>
     </div>

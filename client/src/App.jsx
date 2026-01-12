@@ -25,12 +25,29 @@ function App() {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <>
+        <header className="site-header">
+          <div className="header-content">
+            <h1>Authentication Portal</h1>
+          </div>
+        </header>
+        <div className="container">
+          <div className="loading-message">Loading...</div>
+        </div>
+      </>
+    );
   }
 
   return (
-    <BrowserRouter>
-      <Routes>
+    <>
+      <header className="site-header">
+        <div className="header-content">
+          <h1>Authentication Portal</h1>
+        </div>
+      </header>
+      <BrowserRouter>
+        <Routes>
         <Route
           path="/login"
           element={
@@ -63,7 +80,9 @@ function App() {
         />
         <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>
-    </BrowserRouter>
+      </BrowserRouter>
+    
+    </>
   );
 }
 

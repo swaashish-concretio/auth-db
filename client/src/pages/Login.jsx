@@ -29,43 +29,43 @@ function Login({ setIsAuthenticated }) {
   return (
     <div className="container">
       <div className="auth-card">
-        <h2>Welcome Back</h2>
-        <p>Login to your account</p>
+        <h2>User Login</h2>
+        <p>Please enter your credentials to access your account.</p>
 
         {error && <div className="error">{error}</div>}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email">Email Address *</label>
             <input
               type="email"
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              placeholder="Enter your email"
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password">Password *</label>
             <input
               type="password"
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              placeholder="Enter your password"
             />
           </div>
 
           <button type="submit" className="btn" disabled={loading}>
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? 'Processing...' : 'Submit'}
           </button>
         </form>
 
+        <p className="required-note">* Required field</p>
+
         <div className="switch-auth">
-          Don't have an account? <Link to="/signup">Sign up</Link>
+          Don't have an account? <Link to="/signup">Register here</Link>
         </div>
       </div>
     </div>
