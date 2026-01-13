@@ -8,7 +8,9 @@ export const createUser = async (email, hashedPassword, name) => {
 };
 
 export const findUserByEmail = async (email) => {
-  const query = 'SELECT * FROM users WHERE email = $1';
+  // in this function , the search of the user by email is done using the linear search
+  // implementation of the indexing -  using
+  const query = 'SELECT * FROM users WHERE email = $1'; 
   const result = await pool.query(query, [email]);
   return result.rows[0];
 };
@@ -18,3 +20,4 @@ export const findUserById = async (id) => {
   const result = await pool.query(query, [id]);
   return result.rows[0];
 };
+
