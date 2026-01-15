@@ -15,3 +15,19 @@ export const authenticateToken = (req, res, next) => {
     next();
   });
 };
+
+// Optional authentication - doesn't fail if token is missing/invalid
+export const optionalAuthenticateToken = (req, res, next) => {
+  const token = req.cookies.token;
+
+  if (!token) {
+    return next();
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (!err) {
+      req.user = user;
+    }
+    next();
+  });
+};

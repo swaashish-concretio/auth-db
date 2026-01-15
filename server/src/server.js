@@ -4,6 +4,8 @@ import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import authRoutes from './routes/authRoutes.js';
 import createTables from './config/initDb.js';
+import redis, { connectRedis } from './config/redis.js';
+
 
 dotenv.config();
 
@@ -23,8 +25,18 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Server is running' });
 });
 
+app.get("/get-cache", async (req, res) => {
+  await redis.set("name", "Aashish");
+
+  const name = await redis.get("name");   // wait for Redis
+
+  res.json({ name });
+});
+
+
 const startServer = async () => {
   try {
+    await connectRedis();
     await createTables();
     app.listen(PORT, () => {
       console.log(`✓ Server running on http://localhost:${PORT}`);

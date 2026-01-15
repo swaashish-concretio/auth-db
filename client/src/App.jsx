@@ -15,6 +15,8 @@ function App() {
         await getProfile();
         setIsAuthenticated(true);
       } catch (err) {
+        // Failed to get profile - user is not authenticated
+        console.log('Not authenticated:', err.message);
         setIsAuthenticated(false);
       } finally {
         setLoading(false);
@@ -48,40 +50,40 @@ function App() {
       </header>
       <BrowserRouter>
         <Routes>
-        <Route
-          path="/login"
-          element={
-            isAuthenticated ? (
-              <Navigate to="/dashboard" replace />
-            ) : (
-              <Login setIsAuthenticated={setIsAuthenticated} />
-            )
-          }
-        />
-        <Route
-          path="/signup"
-          element={
-            isAuthenticated ? (
-              <Navigate to="/dashboard" replace />
-            ) : (
-              <Signup setIsAuthenticated={setIsAuthenticated} />
-            )
-          }
-        />
-        <Route
-          path="/dashboard"
-          element={
-            isAuthenticated ? (
-              <Dashboard setIsAuthenticated={setIsAuthenticated} />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-        <Route path="/" element={<Navigate to="/login" replace />} />
-      </Routes>
+          <Route
+            path="/login"
+            element={
+              isAuthenticated ? (
+                <Navigate to="/dashboard" replace />
+              ) : (
+                <Login setIsAuthenticated={setIsAuthenticated} />
+              )
+            }
+          />
+          <Route
+            path="/signup"
+            element={
+              isAuthenticated ? (
+                <Navigate to="/dashboard" replace />
+              ) : (
+                <Signup setIsAuthenticated={setIsAuthenticated} />
+              )
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              isAuthenticated ? (
+                <Dashboard setIsAuthenticated={setIsAuthenticated} />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+          <Route path="/" element={<Navigate to="/login" replace />} />
+        </Routes>
       </BrowserRouter>
-    
+
     </>
   );
 }

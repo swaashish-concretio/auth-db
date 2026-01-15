@@ -9,7 +9,7 @@ const pool = new Pool({
 });
 
 pool.on('connect', () => {
-  console.log('✓ Connected to PostgreSQL database');
+  console.log('✓ Connected to Pgbouncer -> PostgreSQL');
 });
 
 pool.on('error', (err) => {

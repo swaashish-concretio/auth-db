@@ -1,6 +1,14 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { createUser, findUserByEmail, findUserById } from '../models/userModel.js';
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  storeRefreshToken,
+  deleteRefreshToken,
+  verifyRefreshToken,
+  getRefreshToken
+} from '../utils/tokenUtils.js';
 
 export const signup = async (req, res) => {
   try {
@@ -22,17 +30,29 @@ export const signup = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await createUser(email, hashedPassword, name);
 
-    const token = jwt.sign(
-      { id: user.id, email: user.email },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    // Generate access token (short-lived)
+    const accessToken = generateAccessToken({ id: user.id, email: user.email });
 
-    res.cookie('token', token, {
+    // Generate refresh token (long-lived)
+    const refreshToken = generateRefreshToken({ id: user.id, email: user.email });
+
+    // Store refresh token in Redis (7 days TTL)
+    await storeRefreshToken(user.id, refreshToken, 7 * 24 * 60 * 60);
+
+    // Send access token as httpOnly cookie
+    res.cookie('token', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days  // can be chnaged according to the requirement 
+      maxAge: 15 * 60 * 1000 // 15 minutes
+    });
+
+    // Send refresh token as httpOnly cookie
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 
     res.status(201).json({
@@ -67,13 +87,25 @@ export const login = async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    const token = jwt.sign(
-      { id: user.id, email: user.email },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    // Generate access token (short-lived)
+    const accessToken = generateAccessToken({ id: user.id, email: user.email });
 
-    res.cookie('token', token, {
+    // Generate refresh token (long-lived)
+    const refreshToken = generateRefreshToken({ id: user.id, email: user.email });
+
+    // Store refresh token in Redis (7 days TTL)
+    await storeRefreshToken(user.id, refreshToken, 7 * 24 * 60 * 60);
+
+    // Send access token as httpOnly cookie
+    res.cookie('token', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 15 * 60 * 1000 // 15 minutes
+    });
+
+    // Send refresh token as httpOnly cookie
+    res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
@@ -109,7 +141,16 @@ export const getProfile = async (req, res) => {
 
 export const logout = async (req, res) => {
   try {
+    // Get user ID from token if authenticated
+    if (req.user && req.user.id) {
+      // Delete refresh token from Redis
+      await deleteRefreshToken(req.user.id);
+    }
+
+    // Clear both cookies
     res.clearCookie('token');
+    res.clearCookie('refreshToken');
+
     res.json({ message: 'Logout successful' });
   } catch (error) {
     console.error('Logout error:', error);
@@ -117,3 +158,54 @@ export const logout = async (req, res) => {
   }
 };
 
+export const refreshToken = async (req, res) => {
+  try {
+    // Get refresh token from cookie
+    const { refreshToken } = req.cookies;
+
+    if (!refreshToken) {
+      return res.status(401).json({ error: 'Refresh token not found' });
+    }
+
+    // Verify refresh token
+    let decoded;
+    try {
+      decoded = verifyRefreshToken(refreshToken);
+    } catch (error) {
+      return res.status(403).json({ error: 'Invalid refresh token' });
+    }
+
+    // Get stored refresh token from Redis
+    const storedToken = await getRefreshToken(decoded.id);
+
+    // Check if token exists in Redis and matches
+    if (!storedToken || storedToken !== refreshToken) {
+      return res.status(403).json({ error: 'Invalid or expired refresh token' });
+    }
+
+    // Generate new access token
+    const newAccessToken = generateAccessToken({
+      id: decoded.id,
+      email: decoded.email
+    });
+
+    // Send new access token as httpOnly cookie
+    res.cookie('token', newAccessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 15 * 60 * 1000 // 15 minutes
+    });
+
+    res.json({
+      message: 'Token refreshed successfully',
+      user: {
+        id: decoded.id,
+        email: decoded.email
+      }
+    });
+  } catch (error) {
+    console.error('Refresh token error:', error);
+    res.status(500).json({ error: 'Server error during token refresh' });
+  }
+};

@@ -1,27 +1,33 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getProfile, logout } from '../utils/api';
 
 function Dashboard({ setIsAuthenticated }) {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const data = await getProfile();
-        setUser(data.user);
-      } catch (err) {
-        console.error('Failed to fetch profile:', err);
-        handleLogout();
-      } finally {
-        setLoading(false);
-      }
-    };
+  const handleFetchDetails = async () => {
+    setLoading(true);
+    setError(null);
 
-    fetchProfile();
-  }, []);
+    try {
+      const data = await getProfile();
+      setUser(data.user);
+    } catch (err) {
+      console.error('Failed to fetch profile:', err);
+      setError(err.message || 'Failed to fetch user details');
+
+      // If authentication failed, redirect to login
+      if (err.message && err.message.includes('Session expired')) {
+        setIsAuthenticated(false);
+        navigate('/login');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -38,23 +44,30 @@ function Dashboard({ setIsAuthenticated }) {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="container">
-        <div className="dashboard">
-          <p>Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="container">
       <div className="dashboard">
         <h2>User Dashboard</h2>
 
+        <p>Welcome to your dashboard! Click the button below to fetch your details.</p>
+
+        <button
+          onClick={handleFetchDetails}
+          className="btn btn-primary"
+          disabled={loading}
+        >
+          {loading ? 'Loading...' : 'Fetch My Details'}
+        </button>
+
+        {error && (
+          <div className="error-message" style={{ color: 'red', marginTop: '10px' }}>
+            Error: {error}
+          </div>
+        )}
+
         {user && (
           <div className="user-info">
+            <h3>User Information</h3>
             <p><strong>Full Name:</strong> {user.name}</p>
             <p><strong>Email Address:</strong> {user.email}</p>
             <p><strong>Account Created:</strong> {new Date(user.created_at).toLocaleDateString()}</p>
